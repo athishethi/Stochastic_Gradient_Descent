@@ -6,31 +6,48 @@ from sklearn import preprocessing
 st.title("Gradient Descent vs Stochastic Gradient Descent")
 
 # Upload dataset
-uploaded_file = st.file_uploader(r"c:\Users\athis\Downloads\insurance_data (3).csv", type=["csv"])
+uploaded_file = st.file_uploader("insurance_data (3).csv", type=["csv"])
 
 if uploaded_file is not None:
     df = pd.read_csv(r"D:\Stochastic_Gradient_Descent\insurance_data (3).csv")
+
     st.write("Dataset Preview:")
     st.dataframe(df.head())
 
-    if 'price' not in df.columns:
-        st.error("Dataset must contain 'price' column")
+    if 'charges' not in df.columns:
+        st.error("Dataset must contain 'charges' column")
     else:
         # Scaling
         sx = preprocessing.MinMaxScaler()
         sy = preprocessing.MinMaxScaler()
 
-        X = df.drop('price', axis='columns')
-        y = df['price']
+        X = df.drop('charges', axis='columns')
+        y = df['charges']
 
         scaled_X = sx.fit_transform(X)
         scaled_y = sy.fit_transform(y.values.reshape(-1, 1))
 
-        st.write("Scaled Features:")
-        st.write(scaled_X[:5])
+        # Dataset Info
+        st.write("Full Dataset:")
+        st.dataframe(df)
 
-        st.write("Scaled Target:")
-        st.write(scaled_y[:5])
+        st.write("Dataset Shape:", df.shape)
+
+        st.write("Column Names:")
+        st.write(df.columns)
+
+        st.write("Statistical Summary:")
+        st.write(df.describe())
+
+        st.write("Data Types:")
+        st.write(df.dtypes)
+
+        # Visualizations (FIXED INDENTATION)
+        st.write("Correlation Heatmap:")
+        st.write(df.corr(numeric_only=True))
+
+        st.write("Sample Visualization:")
+        st.bar_chart(df.select_dtypes(include=np.number).iloc[:20])
 
         # Gradient Descent Function
         def batch_gradient_descent(X, y, epochs, lr):
@@ -68,3 +85,42 @@ if uploaded_file is not None:
             st.write("Bias:", bias)
 
             st.line_chart(losses)
+
+# OPTIONAL: fallback dataset if no upload
+else:
+    st.warning("Please upload a dataset. Using sample dataset instead.")
+
+    df = pd.DataFrame({
+        "age": np.random.randint(18, 65, 1000),
+        "bmi": np.random.uniform(15, 40, 1000),
+        "children": np.random.randint(0, 6, 1000),
+        "charges": np.random.randint(2000, 50000, 1000)
+    })
+
+    st.write("Generated Large Dataset:")
+    st.dataframe(df)
+
+    st.write("Dataset Shape:", df.shape)
+    st.write("Columns:", df.columns)
+
+    st.dataframe(df.head())
+
+    st.write("Columns in dataset:", df.columns)
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    st.dataframe(df.head())
+
+    # Normalize column names
+    df.columns = df.columns.str.strip().str.lower()
+
+    # If dataset too small → generate large dataset
+    if df.shape[0] < 50:
+        st.warning("Dataset too small. Generating large dataset...")
+
+        df = pd.DataFrame({
+            "age": np.random.randint(18, 65, 1000),
+            "bmi": np.random.uniform(15, 40, 1000),
+            "children": np.random.randint(0, 6, 1000),
+            "charges": np.random.randint(2000, 50000, 1000)
+        })
